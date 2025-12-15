@@ -1,0 +1,72 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AppService } from './app.service';
+
+import { saveFile } from './utils/utils';
+
+class ProductQuery {
+  userId?: string;
+  sort?: 'created_at' | 'nbContacted';
+  city?: string;
+  country?: string;
+  search?: string;
+}
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get('')
+  index() {
+    return 'hello word';
+  }
+
+  @Get('products')
+  async products(@Query() q: ProductQuery) {
+    const { city, country, userId, sort, search } = q;
+
+    let products = await this.appService.getProducts();
+
+    // Normalize search once
+    const normalizedSearch =
+      search && search.trim().length > 2 ? search.trim().toLowerCase() : null;
+
+    products = products.filter((p) => {
+      const user = p.user;
+
+      if (city && user?.city !== city) return false;
+      if (country && user?.country !== country) return false;
+      if (userId && p.userId !== userId) return false;
+
+      if (normalizedSearch) {
+        const text = `${p.title ?? ''} ${user?.shopName ?? ''}`.toLowerCase();
+        if (!text.includes(normalizedSearch)) return false;
+      }
+
+      return true;
+    });
+
+    if (sort === 'created_at') {
+      products.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+
+    return products;
+  }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('')
+  async update(@UploadedFile() file: Express.Multer.File) {
+    const { fullPath, projectRoot } = await saveFile(file);
+    return fullPath.replace(projectRoot + '/', '');
+  }
+}

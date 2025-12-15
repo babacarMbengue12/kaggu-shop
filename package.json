@@ -1,0 +1,60 @@
+{
+  "name": "kaggu-api",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "update": "nest update -f -t latest"
+  },
+  "dependencies": {
+    "@nestjs/cli": "^9.4.0",
+    "@nestjs/common": "^9.4.0",
+    "@nestjs/config": "^2.3.1",
+    "@nestjs/core": "^9.4.0",
+    "@nestjs/platform-express": "^9.4.0",
+    "@nestjs/schematics": "^9.1.0",
+    "@nestjs/serve-static": "^3.0.1",
+    "@types/express": "^4.17.17",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^18.15.11",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "dotenv": "^16.3.1",
+    "expo-server-sdk": "^4.0.0",
+    "firebase-admin": "^13.6.0",
+    "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
+    "pdf2pic": "^3.1.4",
+    "reflect-metadata": "^0.2.2",
+    "rimraf": "^5.0.0",
+    "superagent": "^8.0.9",
+    "typescript": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/moment": "^2.13.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  }
+}
