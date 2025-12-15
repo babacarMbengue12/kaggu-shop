@@ -150,7 +150,9 @@ export type Product = {
   video: string;
   userId: string;
   user: UserInfos;
+  isActive: boolean;
   nbContacted: number;
+  price: number;
 };
 
 export type GlobalObject = {

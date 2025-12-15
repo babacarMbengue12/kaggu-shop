@@ -13,10 +13,11 @@ import { saveFile } from './utils/utils';
 
 class ProductQuery {
   userId?: string;
-  sort?: 'created_at' | 'nbContacted';
+  sort?: 'created_at' | 'nbContacted' | 'price';
   city?: string;
   country?: string;
   search?: string;
+  isActive?: string;
 }
 
 @Controller()
@@ -30,7 +31,7 @@ export class AppController {
 
   @Get('products')
   async products(@Query() q: ProductQuery) {
-    const { city, country, userId, sort, search } = q;
+    const { city, country, userId, sort, search, isActive } = q;
 
     let products = await this.appService.getProducts();
 
@@ -44,6 +45,7 @@ export class AppController {
       if (city && user?.city !== city) return false;
       if (country && user?.country !== country) return false;
       if (userId && p.userId !== userId) return false;
+      if (isActive && !p.isActive) return false;
 
       if (normalizedSearch) {
         const text = `${p.title ?? ''} ${user?.shopName ?? ''}`.toLowerCase();
@@ -53,13 +55,9 @@ export class AppController {
       return true;
     });
 
-    if (sort === 'created_at') {
-      products.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+    if (sort !== 'nbContacted') {
+      products.sort((a, b) => b[sort] - a[sort]);
     }
-
     return products;
   }
 
