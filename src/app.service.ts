@@ -39,16 +39,7 @@ export class AppService {
     }
   }
 
-  _isEmpty() {
-    return this._products.length === 0 || this._users.length === 0;
-  }
-
   _syncData() {
-    if (this._isEmpty()) {
-      console.log('ignore sync');
-      return;
-    }
-
     const users = this._users;
     const usersMap = new Map(users.map((u) => [u.uid, u]));
     const allProducts = this._products.sort(
