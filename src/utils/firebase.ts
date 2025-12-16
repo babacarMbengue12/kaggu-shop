@@ -48,12 +48,13 @@ const db = getFirestore();
 export const usersListner = (cb: (data: UserInfos[]) => void) => {
   return db
     .collection(PATHS.users)
-    .where('isSubscribedAsShop', '==', true)
+    .orderBy('shopName')
     .onSnapshot((snapshot) => {
       const data: UserInfos[] = [];
       snapshot.forEach((doc) => {
         data.push(getDocData<UserInfos>(doc as any));
       });
+
       cb(data);
     });
 };
@@ -82,17 +83,18 @@ export const updateUser = async (uid: string, data: Partial<UserInfos>) => {
 
 export function getDocData<T>(doc: any) {
   const data = doc.data?.() ?? doc.data ?? {};
+  const { favorites, counts, qacidas, rappels, ...rest } = data;
   const item: any = {
-    ...data,
+    ...rest,
     uid: doc.id,
     id: doc.id
   };
   if (item.created_at) {
     // created_at might be a Firestore Timestamp: use toDate() if present
-    if (data.created_at && typeof data.created_at.toDate === 'function') {
-      item.created_at = data.created_at.toDate().getTime();
-    } else if (typeof data.created_at === 'number') {
-      item.created_at = data.created_at;
+    if (rest.created_at && typeof rest.created_at.toDate === 'function') {
+      item.created_at = rest.created_at.toDate().getTime();
+    } else if (typeof rest.created_at === 'number') {
+      item.created_at = rest.created_at;
     } else {
       item.created_at = Date.now();
     }

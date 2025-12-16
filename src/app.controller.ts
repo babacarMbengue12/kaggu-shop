@@ -34,7 +34,6 @@ export class AppController {
     const { city, country, userId, sort, search, isActive } = q;
 
     let products = await this.appService.getProducts();
-
     // Normalize search once
     const normalizedSearch =
       search && search.trim().length > 2 ? search.trim().toLowerCase() : null;
@@ -45,7 +44,11 @@ export class AppController {
       if (city && user?.city !== city) return false;
       if (country && user?.country !== country) return false;
       if (userId && p.userId !== userId) return false;
-      if (isActive && !p.isActive) return false;
+      if (isActive) {
+        if (!p.isActive) return false;
+        if (!p.user.isSubscribedAsShop) return false;
+        if (!p.user.isShopActive) return false;
+      }
 
       if (normalizedSearch) {
         const text = `${p.title ?? ''} ${user?.shopName ?? ''}`.toLowerCase();

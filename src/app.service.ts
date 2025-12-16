@@ -55,7 +55,7 @@ export class AppService {
     }
     this._timeout = setTimeout(() => {
       console.log('sync data');
-      const users = this._users.filter((u) => u.isShopActive);
+      const users = this._users;
       const usersMap = new Map(users.map((u) => [u.uid, u]));
       const allProducts = this._products.sort(
         (a, b) => b.nbContacted - a.nbContacted
