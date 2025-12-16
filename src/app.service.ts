@@ -19,7 +19,6 @@ let expo = new Expo({ maxConcurrentRequests: 100 });
 export class AppService {
   _products: Product[] = [];
   _users: UserInfos[] = [];
-  _timeout: NodeJS.Timeout;
   _globalObject: GlobalObject = {
     products: [],
     users: []
@@ -49,36 +48,30 @@ export class AppService {
       console.log('ignore sync');
       return;
     }
-    if (this._timeout) {
-      clearTimeout(this._timeout);
-      this._timeout = undefined;
-    }
-    this._timeout = setTimeout(() => {
-      console.log('sync data');
-      const users = this._users;
-      const usersMap = new Map(users.map((u) => [u.uid, u]));
-      const allProducts = this._products.sort(
-        (a, b) => b.nbContacted - a.nbContacted
-      );
-      const products: Product[] = [];
-      for (let p of allProducts) {
-        const u = usersMap.get(p.userId);
-        if (u) {
-          products.push({ ...p, user: u });
-        }
-      }
 
-      const obj: GlobalObject = {
-        users,
-        products
-      };
-      this._globalObject = obj;
-      setJsonDataToFile({
-        _globalObject: obj,
-        _products: products,
-        _users: users
-      });
-    }, 2000);
+    const users = this._users;
+    const usersMap = new Map(users.map((u) => [u.uid, u]));
+    const allProducts = this._products.sort(
+      (a, b) => b.nbContacted - a.nbContacted
+    );
+    const products: Product[] = [];
+    for (let p of allProducts) {
+      const u = usersMap.get(p.userId);
+      if (u) {
+        products.push({ ...p, user: u });
+      }
+    }
+
+    const obj: GlobalObject = {
+      users,
+      products
+    };
+    this._globalObject = obj;
+    setJsonDataToFile({
+      _globalObject: obj,
+      _products: products,
+      _users: users
+    });
   }
 
   _listen() {
