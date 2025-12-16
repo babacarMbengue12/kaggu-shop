@@ -9,6 +9,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 
+import { Product } from './utils/firebase';
 import { saveFile } from './utils/utils';
 
 class ProductQuery {
@@ -33,7 +34,7 @@ export class AppController {
   async products(@Query() q: ProductQuery) {
     const { city, country, userId, sort, search, isActive } = q;
 
-    let products = await this.appService.getProducts();
+    let { products, countries } = this.appService.getAll();
     // Normalize search once
     const normalizedSearch =
       search && search.trim().length > 2 ? search.trim().toLowerCase() : null;
@@ -59,9 +60,17 @@ export class AppController {
     });
 
     if (sort !== 'nbContacted') {
-      products.sort((a, b) => b[sort] - a[sort]);
+      if (sort === 'price') {
+        const getPrice = (p: Product) =>
+          typeof p.price === 'string'
+            ? parseFloat(p.price)
+            : (p.price as number);
+        products.sort((a, b) => getPrice(a) - getPrice(b));
+      } else {
+        products.sort((a, b) => b[sort] - a[sort]);
+      }
     }
-    return products;
+    return { products, countries };
   }
 
   @UseInterceptors(FileInterceptor('file'))

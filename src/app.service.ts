@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 import {
+  Country,
   GlobalObject,
   IS_PRIMARY_APP,
   Product,
@@ -19,9 +20,11 @@ let expo = new Expo({ maxConcurrentRequests: 100 });
 export class AppService {
   _products: Product[] = [];
   _users: UserInfos[] = [];
+  _timeout: NodeJS.Timeout;
   _globalObject: GlobalObject = {
     products: [],
-    users: []
+    users: [],
+    countries: []
   };
   constructor() {
     if (IS_PRIMARY_APP) {
@@ -39,30 +42,58 @@ export class AppService {
     }
   }
 
-  _syncData() {
-    const users = this._users;
-    const usersMap = new Map(users.map((u) => [u.uid, u]));
-    const allProducts = this._products.sort(
-      (a, b) => b.nbContacted - a.nbContacted
-    );
-    const products: Product[] = [];
-    for (let p of allProducts) {
-      const u = usersMap.get(p.userId);
-      if (u) {
-        products.push({ ...p, user: u });
-      }
-    }
+  _isEmpty() {
+    return this._products.length === 0 || this._users.length === 0;
+  }
 
-    const obj: GlobalObject = {
-      users,
-      products
-    };
-    this._globalObject = obj;
-    setJsonDataToFile({
-      _globalObject: obj,
-      _products: products,
-      _users: users
-    });
+  _syncData() {
+    if (this._isEmpty()) {
+      console.log('ignore sync');
+      return;
+    }
+    if (this._timeout) {
+      clearTimeout(this._timeout);
+      this._timeout = undefined;
+    }
+    this._timeout = setTimeout(() => {
+      const users = this._users;
+      const usersMap = new Map(users.map((u) => [u.uid, u]));
+      const allProducts = this._products.sort(
+        (a, b) => b.nbContacted - a.nbContacted
+      );
+      const products: Product[] = [];
+      for (let p of allProducts) {
+        const u = usersMap.get(p.userId);
+        if (u) {
+          products.push({ ...p, user: u });
+        }
+      }
+
+      const finalCountries: Country[] = [];
+      for (let u of users) {
+        const index = finalCountries.findIndex((f) => f.name === u.country);
+        if (index !== -1) {
+          const it = finalCountries[index];
+          if (!it.villes.includes(u.city)) it.villes.push(u.city);
+        } else {
+          finalCountries.push({
+            name: u.country,
+            villes: [u.city]
+          });
+        }
+      }
+      const obj: GlobalObject = {
+        users,
+        products,
+        countries: finalCountries
+      };
+      this._globalObject = obj;
+      setJsonDataToFile({
+        _globalObject: obj,
+        _products: products,
+        _users: users
+      });
+    }, 2000);
   }
 
   _listen() {

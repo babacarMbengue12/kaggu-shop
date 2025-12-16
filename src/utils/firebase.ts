@@ -132,16 +132,18 @@ export type UserInfos = {
   fullName: string;
   shopName: string;
   shopAddress: string;
-  shopLat: number;
-  shopLng: number;
+  shopLat: string;
+  shopLng: string;
   shopTikTokLink: string;
-  showImage: string;
+  shopImage: string;
   lastPaiementDate?: number;
   city: string;
   country: string;
   isSubscribedAsShop: boolean;
+  validation: boolean;
   isShopActive: boolean;
   whatsAppContact: string;
+  subscription: string;
 };
 
 export type Product = {
@@ -154,10 +156,16 @@ export type Product = {
   user: UserInfos;
   isActive: boolean;
   nbContacted: number;
-  price: number;
+  price: string;
+};
+
+export type Country = {
+  name: string;
+  villes: string[];
 };
 
 export type GlobalObject = {
   users: UserInfos[];
   products: Product[];
+  countries: Country[];
 };
