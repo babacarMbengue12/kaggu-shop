@@ -70,7 +70,9 @@ export class AppService {
       }
 
       const finalCountries: Country[] = [];
-      for (let u of users) {
+      const usersIds = Array.from(new Set(products.map((p) => p.user.uid)));
+      for (let uid of usersIds) {
+        const u = usersMap.get(uid);
         const index = finalCountries.findIndex((f) => f.name === u.country);
         if (index !== -1) {
           const it = finalCountries[index];

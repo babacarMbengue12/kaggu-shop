@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UploadedFile,
@@ -71,6 +72,22 @@ export class AppController {
       }
     }
     return { products, countries };
+  }
+
+  @Get('get-item/:uid')
+  async getItemById(@Param('uid') uid: string) {
+    const products = await this.appService.getProducts();
+    return products.find((it) => it.uid === uid) ?? null;
+  }
+
+  @Get('get-item-share/:uid')
+  async getItemShareById(@Param('uid') uid: string) {
+    const item = await this.getItemById(uid);
+    if (item) {
+      const { user, userId, nbContacted, video, ...rest } = item;
+      return rest;
+    }
+    return null;
   }
 
   @UseInterceptors(FileInterceptor('file'))
